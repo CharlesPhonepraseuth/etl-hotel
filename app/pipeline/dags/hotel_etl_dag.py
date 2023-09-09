@@ -28,7 +28,7 @@ with DAG("hotel_ETL_dag",
     @task
     def extract_hotel():
         folder_path = DATA_FOLDER + "external/accommodations/"
-        # extract_files.get_hotel_csv(folder_path)
+        extract_files.get_hotel_csv(folder_path)
 
         is_valid = data_validation.validate(folder_path, "accommodations")
 
@@ -39,7 +39,7 @@ with DAG("hotel_ETL_dag",
     @task
     def extract_adress():
         folder_path = DATA_FOLDER + "external/adress/"
-        # extract_files.get_adress_csv(folder_path)
+        extract_files.get_adress_csv(folder_path)
 
         is_valid = data_validation.validate(folder_path + "csv/", "adress")
 
@@ -49,7 +49,7 @@ with DAG("hotel_ETL_dag",
     @task
     def transform():
         folder_path = DATA_FOLDER
-        # transform_files.merge_csv(folder_path)
+        transform_files.merge_csv(folder_path)
         
         folder_path = DATA_FOLDER + "processed/"
         is_valid = data_validation.validate(folder_path, "transform")
