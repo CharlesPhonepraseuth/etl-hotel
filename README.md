@@ -188,8 +188,8 @@ When you've completed your data analysis and ETL operations, you can stop and cl
 
 If you have questions, need assistance, or would like to provide feedback, please feel free to contact us using the following channels:
 
-Email: charles.phonepraseuth@gmail.com
-GitHub: [CharlesPhonepraseuth](https://github.com/CharlesPhonepraseuth)
+Email: charles.phonepraseuth@gmail.com  
+GitHub: [CharlesPhonepraseuth](https://github.com/CharlesPhonepraseuth)  
 LinkedIn: [Charles Phonepraseuth](https://www.linkedin.com/in/charlesphonepraseuth/)
 
 I value your input and am here to assist you. Don't hesitate to reach out!

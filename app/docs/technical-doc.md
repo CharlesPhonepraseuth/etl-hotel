@@ -2,7 +2,7 @@
 
 Written by [Charles Phonepraseuth](https://www.linkedin.com/in/charlesphonepraseuth/)
 
-This document covers ETL pipeline project in details.
+This document covers ETL pipeline project in details.  
 If you want to going through the code, the entrypoint is `/app/pipeline/dags/hotel_etl_dag.py`.
 
 # Table of Contents
