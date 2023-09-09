@@ -1,0 +1,3 @@
+id;nom_lieu_dit;code_postal;code_insee;nom_commune;code_insee_ancienne_commune;nom_ancienne_commune;x;y;lon;lat;source_position;source_nom_voie
+97301_0007;Chemin Departemental N 20;97390;97301;Régina;;;372786.65;476366.44;-52.146377;4.30889;cadastre;cadastre
+97301_B010;Camp Szuts;97390;97301;Régina;;;371536.34;473612.1;-52.157605;4.28396;cadastre;cadastre
