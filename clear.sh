@@ -18,4 +18,7 @@ cleanup(){
     docker network ls
 }
 
-clear_docker
+# the next line calls the function passed as the first parameter to the script.
+# the remaining script arguments can be passed to this function.
+
+$1
