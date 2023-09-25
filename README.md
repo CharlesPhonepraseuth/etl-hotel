@@ -22,6 +22,7 @@ This document covers everything and provide an overview about this ETL pipeline 
 - [Workflow](#workflow)
 - [Running tests](#running-tests)
 - [Stop and Cleanup](#stop-and-cleanup)
+- [Disclaimer](#disclaimer)
 - [Contact Information](#contact-information)
 
 # <a id="introduction"></a>Introduction
@@ -181,6 +182,22 @@ When you've completed your data analysis and ETL operations, you can stop and cl
 # to cleanup docker and free up ressources
 ./clear.sh cleanup
 ```
+
+----
+
+# <a id="disclaimer"></a>Disclaimer
+
+In the course of developing this project, it is important to note that certain decisions were made based on the specifications and capabilities of the development environment. The system utilized for development may have specific limitations that influenced the choice of tools, libraries, and methodologies.
+
+> The following is my personal computer specs:
+>
+> - **Model**: MacBook Pro (early 2013)
+> - **Processor**: 3.0GHz dual-core Intel Core i7
+> - **Memory**: 8GB of 1600MHz DDR3L onboard memory
+
+Due to hardware or software constraints, certain options or features may not have been available or feasible within the given context. As a result, alternative approaches were implemented to ensure the successful completion of the project.
+
+For more details: [Limitations](./app/docs/technical-doc.md#limitations)
 
 ----
 
