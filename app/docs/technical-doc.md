@@ -157,7 +157,7 @@ If you need to re-run the loading step, it should produce the same results witho
 
 <div style="text-align:center">
 
-  ![database-schema](assets/database_schema.svg)
+  ![database-schema](assets/database_schema.png)
 
 </div>
 
