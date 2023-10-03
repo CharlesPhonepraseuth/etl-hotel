@@ -51,7 +51,7 @@ First, clone the ETL pipeline repository to your local machine:
 
 ```sh
 git clone https://github.com/CharlesPhonepraseuth/etl-pipeline.git
-cd your-repo-directory
+cd etl-pipeline
 ```
 
 ## Step 2: Create logs folder
