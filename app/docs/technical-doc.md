@@ -3,12 +3,12 @@
 Written by [Charles Phonepraseuth](https://www.linkedin.com/in/charlesphonepraseuth/)
 
 This document covers ETL pipeline project in details.  
-If you want to going through the code, the entrypoint is `/app/pipeline/dags/hotel_etl_dag.py`.
 
 # Table of Contents
 
 - [Technical Documentation](#technical-documentation)
 - [Table of Contents](#table-of-contents)
+- [Airflow Orchestrator](#airflow-orchestrator)
 - [Data Sources and Destinations](#data-sources-and-destinations)
   - [Accommodations Dataset](#accommodations-dataset)
     - [Source: Website 1](#source-website-1)
@@ -19,10 +19,71 @@ If you want to going through the code, the entrypoint is `/app/pipeline/dags/hot
 - [Transformations](#transformations)
 - [Data Loading](#data-loading)
 - [Database Schema](#database-schema)
-- [Data Analysis](#data-analysis)
+- [Data Visualization](#data-visualization)
 - [Limitations](#limitations)
 
 ![workflow](./assets/workflow.gif)
+
+# <a id="airflow-orchestrator"></a>Airflow Orchestrator
+
+If you want to going through the code, the entrypoint is `/app/pipeline/dags/hotel_etl_dag.py`.
+
+![airflow worklow](./assets/airflow_workflow.png)
+
+We use Airflow to orchestrate and automatize our ETL pipeline.
+
+Our project is split into 3 main parts (extraction, transformation and loading). As shown by the previous schema, we have to successfully extract data, then, we can apply some transformation, and finally, we load these processed data into our database.
+
+The following code snippet illustrate data extraction in 2 different sources:
+
+```py
+@task
+    def extract_hotel():
+        folder_path = DATA_FOLDER + "external/accommodations/"
+        extract_files.get_hotel_csv(folder_path)
+
+        is_valid = data_validation.validate(folder_path, "accommodations")
+
+        if not is_valid:
+            raise ValueError("Extract hotel not valid")
+
+@task
+    def extract_adress():
+        folder_path = DATA_FOLDER + "external/adress/"
+        extract_files.get_adress_csv(folder_path)
+
+        is_valid = data_validation.validate(folder_path + "csv/", "adress")
+
+        if not is_valid:
+            raise ValueError("Extract adress not valid")
+```
+
+As shown above, firstly we download CSV files, then we do some validations.  
+Only if these validations were successful, we start transformation parts with the following:
+
+```py
+@task
+    def transform():
+        folder_path = DATA_FOLDER
+        transform_files.merge_csv(folder_path)
+        
+        folder_path = DATA_FOLDER + "processed/"
+        is_valid = data_validation.validate(folder_path, "transform")
+
+        if not is_valid:
+            raise ValueError("Transform not valid")
+```
+
+We merge data and create new file by applying some transformations on our CSV files from 2 different sources. Once again, at the end of this process, we do some validations to check if the data is relatable and ready to be load into our database.
+
+Finally, we load our clean and processed data by the following code snippet:
+
+```py
+@task
+    def load():
+        folder_path = DATA_FOLDER + "processed/"
+        load_files.load(folder_path)
+```
 
 # <a id="data-sources-and-destination"></a>Data Sources and Destinations
 
@@ -169,62 +230,145 @@ This database schema is designed to facilitate analytical processes, providing a
 
 ----
 
-# <a id="data-analysis"></a>Data Analysis
+# <a id="data-visualization"></a>Data Visualization
 
-If you need to do some SQL queries for data analysis, you can perform this with the following code snippets on notebooks:
+To do data visualization, we use Dash Plotly. And to handle it properly, we use ***Model-View-Controller*** (***MVC***) pattern, who allow us to have a concise ***separation of concerns*** and have a ***scalable*** and ***maintainable*** code.
+
+![mvc-schema](assets/mvc_schema.png)
+
+If you want to going through the code, the entrypoint is `/app/dashboard/index.py`.  
+
+Firstly, we register router and callback files.
 
 ```py
-# Create an engine to connect to your PostgreSQL database
-connection = DatabaseConnection(**helper.get_db_creds())
-
-# Which region be a part of top 10
-# with most hotel who star rating
-# above national average per region ?
-query = """
-    WITH region AS (
-        SELECT
-                id,
-                LEFT(zip, 2) AS num
-            FROM dim_adress
-    ),
-    avg_star AS (
-        SELECT
-            ROUND(AVG(star), 2) AS value
-        FROM fact_hotel
-    ),
-    hotel_data AS (
-        SELECT
-            region.num AS region_num,
-            COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) as hotel_count,
-            DENSE_RANK() OVER (ORDER BY COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) DESC) AS region_rank
-        FROM fact_hotel AS fh
-        JOIN region ON fh.adress_id = region.id, avg_star
-        GROUP BY region.num
-    )
-    SELECT
-        region_num,
-        hotel_count,
-        region_rank
-    FROM hotel_data
-    WHERE region_rank <= 10;
-"""
-
-result = connection.read_sql(query)
-print(result)
-
-#    region_num  hotel_count  region_rank
-# 0          06          211            1
-# 1          74          169            2
-# 2          92           88            3
-# 3          64           87            4
-# 4          67           86            5
-# 5          65           77            6
-# 6          83           73            7
-# 7          44           70            8
-# 8          21           70            8
-# 9          35           67            9
-# 10         68           64           10
+# index.py
+### Set up router ###
+register_router()
+### Set up callbacks ###
+hotel_callback.register_callbacks(app)
 ```
+
+Then, we create a router who return the view when reaching a specific endpoint.
+
+```py
+# router.py
+@app.callback(
+    Output('page-content', 'children'),
+    [Input('url', 'pathname')]
+)
+def display_page(pathname):
+
+    if pathname == '/hotel-analysis':
+        return hotel_analysis.serve_layout()
+```
+
+After that, we create a layout (***View***) with user interaction, a dropdown in our case.
+
+```py
+# hotel_analysis.py
+def serve_layout():
+
+    layout = html.Div([
+        ...
+
+        html.Div([
+            html.P('Top :'),
+            html.Div(
+                dcc.Dropdown(id='top-avg-dropdown',
+                            placeholder="Select a value",
+                            options=rank_options
+                ),
+                className='dropdown-rank'
+            ),
+        ], className='dropdown-container'),
+
+        dcc.Loading(
+            id="loading-graph",
+            children=[
+                dash_table.DataTable(id='top-avg-output-div', columns=[], data=[])
+            ],
+            type="circle"
+        )
+
+        ...
+    ])
+
+    return layout
+```
+
+Afterward, we create a Dash callback (***Controller***), who will be the concomitant point between the ***View*** and the ***Model***.  
+In this case, we want to fetch data depend on the dropdown value got by user interaction, and render the result by updating our ***View***.
+
+```py
+# hotel_callback.py
+def register_callbacks(app):
+
+    @app.callback(
+        Output('top-avg-output-div', 'columns'),
+        Output('top-avg-output-div', 'data'),
+        [Input(component_id = 'top-avg-dropdown', component_property = 'value')]
+    )
+    def update_rank_hotel_count_by_avg_output(rank):
+
+        param = {"rank": rank}
+
+        mapper = DataMapper()
+        df = mapper.get_hotel_count_and_rank_per_region_above_avg_rating(param)
+
+        columns = [{'name': col, 'id': col} for col in df.columns]
+        data = df.to_dict('records')
+
+        return columns, data
+```
+
+Next, we create a DataMapper method (***Model***) who will interact with the database and return data to our ***Controller*** in our case.
+
+```py
+# data_mapper.py
+class DataMapper:
+    ...
+
+    def get_hotel_count_and_rank_per_region_above_avg_rating(self, param={}) -> pd.DataFrame:
+        df = self.conn.execute_sql_file(BASEPATH + "get_hotel_count_and_rank_per_region_above_avg_rating.sql", param)
+        return df
+```
+
+To increase maintainability and lisibility, we separate the SQL query to our DataMapper method.
+
+```sql
+-- get_hotel_count_and_rank_per_region_above_avg_rating.sql
+WITH region AS (
+    SELECT
+        id,
+        LEFT(zip, 2) AS num
+    FROM dim_adress
+),
+avg_star AS (
+    SELECT
+        ROUND(AVG(star), 2) AS value
+    FROM fact_hotel
+),
+hotel_data AS (
+    SELECT
+        region.num AS region_num,
+        COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) as hotel_count,
+        DENSE_RANK() OVER (ORDER BY COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) DESC) AS region_rank
+    FROM fact_hotel AS fh
+    JOIN region ON fh.adress_id = region.id,
+        avg_star
+    GROUP BY region.num
+)
+SELECT
+    region_num,
+    hotel_count,
+    region_rank
+FROM hotel_data
+WHERE region_rank <= %(rank)s;
+```
+
+Subsequently, the data fetched from our ***Model*** by our ***Controller*** will update the ***View***.
+
+----
 
 # <a id="limitations"></a>Limitations
 
