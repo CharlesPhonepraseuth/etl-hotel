@@ -140,7 +140,7 @@ Once the containers are up and running, you can access the ETL pipeline via the 
 - pgAdmin UI: [http://localhost:5050](http://localhost:5050)
 - Dash UI: [http://localhost:8050](http://localhost:8050)
 
-> **Note:** You'll find each credentials inside the `.env` file.
+> **Note:** You'll find each credentials inside the `.env` file.  
 > **Note\*:** To properly use Dash app, you'll have to run and finish ETL pipeline first.
 
 ## Step 3: Run pipeline
