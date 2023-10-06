@@ -80,27 +80,6 @@ services:
       depends_on:
         postgres:
           condition: service_healthy
-  
-  notebook:
-      container_name: notebook
-      build:
-        context: .
-        dockerfile: ./docker/notebook/Dockerfile
-      volumes:
-        - ./app:/home/app
-      environment:
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - POSTGRES_DB=${POSTGRES_DB}
-        - POSTGRES_HOST=${POSTGRES_HOST}
-        - POSTGRES_HTTP_PORT=${POSTGRES_HTTP_PORT}
-      ports:
-        - ${NOTEBOOK_HTTP_PORT}:${NOTEBOOK_HTTP_PORT}
-      networks:
-        - lan
-      depends_on:
-        postgres:
-          condition: service_healthy
 
 
   dashboard:

@@ -138,15 +138,10 @@ Once the containers are up and running, you can access the ETL pipeline via the 
 
 - Airflow UI: [http://localhost:8080](http://localhost:8080)
 - pgAdmin UI: [http://localhost:5050](http://localhost:5050)
-- Jupyter Notebook UI: [http://localhost:8888](http://localhost:8888)
+- Dash UI: [http://localhost:8050](http://localhost:8050)
 
 > **Note:** You'll find each credentials inside the `.env` file.
-> **Note\*:** Jupyter Notebook's token is findable into the CLI.
-> This is an example :
->
-> ```sh
-> notebook  |  http://127.0.0.1:8888/tree?token=a10fbdde9d1f5aec11b9523eb252cc1352661e8e60b7a839
-> ```
+> **Note\*:** To properly use Dash app, you'll have to run and finish ETL pipeline first.
 
 ## Step 3: Run pipeline
 
