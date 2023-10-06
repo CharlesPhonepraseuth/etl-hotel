@@ -6,6 +6,8 @@ import pandas as pd
 import polars as pl
 from sqlalchemy import create_engine
 
+from src.utils import helper
+
 
 class DatabaseConnection:
     def __init__(self, db: str, user: str, password: str, host: str, port: int):
@@ -47,6 +49,24 @@ class DatabaseConnection:
             return df
         except Exception as e:
             print("An error occured while fetching data :", str(e))
+    
+    def execute_sql_file(self, file_path: str, params={}, output_format="pd") -> Union[pd.DataFrame, pl.DataFrame, None]:
+        try:
+            query = helper.load_query(file_path)
+
+            if not query:
+                return pd.DataFrame()
+
+            if not params:
+                df = pd.read_sql_query(query, con=self.engine)
+            else:
+                df = pd.read_sql_query(query, params=params, con=self.engine)
+            
+            df = self.__get_pd_or_pl(df, output_format)
+            
+            return df
+        except Exception as e:
+            print("An error occured while executing sql file :", str(e))
 
     def __get_pd_or_pl(self, df: pd.DataFrame, output_format: str) -> Union[pd.DataFrame, pl.DataFrame]:
         """This function allow us to keep pandas dataframe or turn it into polars

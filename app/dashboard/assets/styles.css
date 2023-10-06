@@ -1,0 +1,42 @@
+*, html {
+    color: #343A40
+}
+
+h1 {
+    text-align: center;
+}
+
+.view-container {
+    width: 80vw;
+    margin: auto;
+    padding-bottom: 6em;
+}
+
+.view-container section {
+    margin: 1em auto 3em auto;
+}
+
+.card-container {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.card-text.nb {
+    text-align: center;
+    font-size: 2em;
+}
+
+.dropdown-container {
+    display: flex;
+    align-items: baseline;
+}
+
+.dropdown-city {
+    width: 21em;
+    margin-left: 1em;
+}
+
+.dropdown-rank {
+    width: 10em;
+    margin-left: 1em;
+}

@@ -1,0 +1,3 @@
+SELECT
+	PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY star) AS value
+FROM fact_hotel;

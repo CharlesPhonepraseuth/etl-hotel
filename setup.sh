@@ -10,6 +10,7 @@ start(){
     docker compose up airflow-init
     docker compose up postgres-airflow redis airflow-webserver airflow-scheduler airflow-worker flower
     docker compose up notebook
+    docker compose up dashboard
 }
 
 # the next line calls the function passed as the first parameter to the script.

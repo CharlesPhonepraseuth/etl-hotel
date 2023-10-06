@@ -44,6 +44,10 @@ x-airflow-common: &airflow-common
 
 services:
 
+  ###
+  ### APP CONTAINER
+  ###
+
   postgres:
     container_name: pg
     image: postgres
@@ -94,7 +98,35 @@ services:
         - ${NOTEBOOK_HTTP_PORT}:${NOTEBOOK_HTTP_PORT}
       networks:
         - lan
-  
+      depends_on:
+        postgres:
+          condition: service_healthy
+
+
+  dashboard:
+      container_name: dashboard
+      build:
+        context: .
+        dockerfile: ./docker/dashboard/Dockerfile
+      volumes:
+        - ./app/dashboard:/code/dashboard
+        - ./app/src/utils:/code/src/utils
+        - ./app/src/sql_scripts:/code/src/sql_scripts
+      environment:
+        - DASH_HTTP_PORT=${DASH_HTTP_PORT}
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        - POSTGRES_DB=${POSTGRES_DB}
+        - POSTGRES_HOST=${POSTGRES_HOST}
+        - POSTGRES_HTTP_PORT=${POSTGRES_HTTP_PORT}
+      ports:
+        - ${DASH_HTTP_PORT}:${DASH_HTTP_PORT}
+      networks:
+        - lan
+      depends_on:
+        postgres:
+          condition: service_healthy
+
 
   tests:
     container_name: tests
@@ -108,6 +140,10 @@ services:
     command: pytest --color=yes -v
 
   
+  ###
+  ### AIRFLOW CONTAINER
+  ###
+
   postgres-airflow:
     container_name: postgres-airflow
     image: postgres:13

@@ -52,6 +52,11 @@ def get_data_schema(source: str) -> dict:
 
 
 def get_db_creds() -> Dict[str, Optional[Union[str, int]]]:
+    """This function get database credentials
+
+    Returns:
+        Dict[str, Optional[Union[str, int]]]: database credentials
+    """
     return {
         'user': os.getenv("POSTGRES_USER"),
         'password': os.getenv("POSTGRES_PASSWORD"),
@@ -59,3 +64,17 @@ def get_db_creds() -> Dict[str, Optional[Union[str, int]]]:
         'host': os.getenv("POSTGRES_HOST"),
         'port': int(os.getenv("POSTGRES_HTTP_PORT", 5432)),
     }
+
+
+def load_query(file_path: str):
+    """This function convert sql file to understable query
+
+    Args:
+        file_path (str): file path
+
+    Returns:
+        str: sql query as string
+    """
+    print(file_path)
+    with open(file_path, 'r') as file:
+        return file.read()
