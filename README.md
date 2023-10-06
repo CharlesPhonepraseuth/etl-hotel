@@ -59,7 +59,7 @@ cd etl-pipeline
 To use Airflow correctly, you have to create logs folder into pipeline.
 
 ```sh
-cd your-repo-directory/app/pipeline
+cd etl-pipeline/app/pipeline
 mkdir logs
 ```
 
