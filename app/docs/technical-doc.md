@@ -296,7 +296,7 @@ def serve_layout():
     return layout
 ```
 
-Afterward, we create a Dash callback (***Controller***), who will be the concomitant point between the ***View*** and the ***Model***.  
+Afterward, we create a Dash callback (***Controller***), who will concentrate all logic and be the concomitant point between the ***View*** and the ***Model***.  
 In this case, we want to fetch data depend on the dropdown value got by user interaction, and render the result by updating our ***View***.
 
 ```py

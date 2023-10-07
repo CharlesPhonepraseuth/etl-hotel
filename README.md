@@ -75,6 +75,11 @@ Copy and paste `.env-example` file and rename it `.env` into root directory with
 📂 root
 └── 📁 app                          # Project code
 │   └── 📁 config                   # Configuration files
+│   └── 📁 dashboard                # Dash application scripts for visualization and analysis
+│   │   └── 📁 assets               # Static files like images, stylesheets, and JavaScript files
+│   │   └── 📁 callbacks            # Dash callback scripts
+│   │   └── 📁 views                # Dash layout scripts
+│   │       └── 📁 partials         # Dash common layout scripts
 │   └── 📁 data                     # Raw and processed data files
 │   │   └── 📁 external             # Data from external sources
 │   │   │   └── 📁 accommodations
@@ -87,7 +92,6 @@ Copy and paste `.env-example` file and rename it `.env` into root directory with
 │   │   └── 📁 extract
 │   │   └── 📁 load
 │   │   └── 📁 transform
-│   └── 📁 notebooks                # Jupyter notebooks for exploration and analysis
 │   └── 📁 pipeline                 # Data pipeline orchestration scripts (Airflow)
 │   │   └── 📁 dags
 │   │   └── 📁 logs
@@ -102,7 +106,7 @@ Copy and paste `.env-example` file and rename it `.env` into root directory with
 │       └── 📁 unit
 └── 📁 docker                       # Define Docker container files
 │   └── 📁 airflow
-│   └── 📁 notebook
+│   └── 📁 dashboard
 │   └── 📁 postgres
 │   └── 📁 tests
 ├── 📄 .env-example                 # Environment variables example
