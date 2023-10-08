@@ -24,4 +24,4 @@ SELECT
     hotel_count,
     region_rank
 FROM hotel_data
-WHERE region_rank <= %(rank)s;
+WHERE region_rank <= :rank;

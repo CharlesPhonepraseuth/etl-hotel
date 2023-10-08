@@ -6,4 +6,4 @@ SELECT
 FROM fact_hotel AS fh
 JOIN dim_info AS di ON fh.info_id = di.id
 JOIN dim_adress AS da ON fh.adress_id = da.id
-WHERE da.city = %(city)s;
+WHERE da.city = :city;

@@ -18,4 +18,4 @@ SELECT
     region_num,
     capacity_nb
 FROM region_capacity
-WHERE capacity_rank <= %(rank)s;
+WHERE capacity_rank <= :rank;

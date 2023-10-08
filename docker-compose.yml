@@ -98,8 +98,33 @@ services:
         - POSTGRES_DB=${POSTGRES_DB}
         - POSTGRES_HOST=${POSTGRES_HOST}
         - POSTGRES_HTTP_PORT=${POSTGRES_HTTP_PORT}
+        - API_REQUEST_URL=${API_REQUEST_URL}
       ports:
         - ${DASH_HTTP_PORT}:${DASH_HTTP_PORT}
+      networks:
+        - lan
+      depends_on:
+        postgres:
+          condition: service_healthy
+
+
+  api:
+      container_name: api
+      build: 
+        context: .
+        dockerfile: ./docker/api/Dockerfile
+      volumes:
+        - ./app/api:/code/api
+        - ./app/src/utils:/code/src/utils
+        - ./app/src/sql_scripts:/code/src/sql_scripts
+      environment:
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        - POSTGRES_DB=${POSTGRES_DB}
+        - POSTGRES_HOST=${POSTGRES_HOST}
+        - POSTGRES_HTTP_PORT=${POSTGRES_HTTP_PORT}
+      ports:
+        - ${FASTAPI_HTTP_PORT}:${FASTAPI_HTTP_PORT}
       networks:
         - lan
       depends_on:

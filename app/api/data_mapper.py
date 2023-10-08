@@ -8,15 +8,16 @@ from src.utils.database import DatabaseConnection
 
 BASEPATH = "/code/src/sql_scripts/"
 
+
 class DataMapper:
     def __init__(self):
         self.conn = DatabaseConnection(**helper.get_db_creds())
 
     def get_hotel_count(self) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_hotel_count.sql")
-        return df
+        result = self.conn.execute_sql_file(BASEPATH + "get_hotel_count.sql")
+        return result
     
-    def get_national_rating_avg(self) -> pd.DataFrame:
+    def get_rating_average(self) -> pd.DataFrame:
         df = self.conn.execute_sql_file(BASEPATH + "get_rating_avg.sql")
         return df
 
@@ -24,8 +25,8 @@ class DataMapper:
         df = self.conn.execute_sql_file(BASEPATH + "get_rating_median.sql")
         return df
     
-    def get_star_distribution(self) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_star_distribution.sql")
+    def get_rating_distribution(self) -> pd.DataFrame:
+        df = self.conn.execute_sql_file(BASEPATH + "get_rating_distribution.sql")
         return df
 
     def get_all_cities(self) -> pd.DataFrame:

@@ -1,10 +1,10 @@
 # Standard library imports
-from typing import Union
+from typing import Union, Dict, Any
 
 # Third party imports
 import pandas as pd
 import polars as pl
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 # Local application imports
 from src.utils import helper
@@ -51,21 +51,44 @@ class DatabaseConnection:
         except Exception as e:
             print("An error occured while fetching data :", str(e))
     
-    def execute_sql_file(self, file_path: str, params={}, output_format="pd") -> Union[pd.DataFrame, pl.DataFrame, None]:
+    def execute_sql_file(self, file_path: str, params={}, output_format="json") -> Union[Dict[str, Any], pd.DataFrame, pl.DataFrame]:
+        """This function execute sql file and return response
+
+        Args:
+            file_path (str): sql script file path
+            params (dict, optional): parameter for sql placeholder. Defaults to {}.
+            output_format (str, optional): output format (json, pd, pl). Defaults to "json".
+
+        Returns:
+            Union[Dict[str, Any], pd.DataFrame, pl.DataFrame]: json response for api. pd or pl dataframe.
+        """
         try:
             query = helper.load_query(file_path)
 
-            if not query:
-                return pd.DataFrame()
+            if output_format == "json":
 
-            if not params:
-                df = pd.read_sql_query(query, con=self.engine)
+                with self.engine.connect() as conn:
+                    if not params:
+                        result = conn.execute(text(query))
+                    else:
+                        result = conn.execute(text(query), params)
+                    
+                    result_json = result.mappings().all()
+
+                    return result_json
             else:
-                df = pd.read_sql_query(query, params=params, con=self.engine)
-            
-            df = self.__get_pd_or_pl(df, output_format)
-            
-            return df
+
+                if not query:
+                    return pd.DataFrame()
+
+                if not params:
+                    df = pd.read_sql_query(query, con=self.engine)
+                else:
+                    df = pd.read_sql_query(query, params=params, con=self.engine)
+                
+                df = self.__get_pd_or_pl(df, output_format)
+                
+                return df
         except Exception as e:
             print("An error occured while executing sql file :", str(e))
 
