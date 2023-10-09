@@ -424,6 +424,21 @@ def register_callbacks(app):
 
 By following the Model-View-Controller pattern, this application effectively separates concerns, making it modular and easier to maintain. FastAPI serves as a robust Model for data handling, while Dash Plotly provides an intuitive platform for building interactive visualizations.
 
+<details>
+    <summary>Dash dashboard UI:</summary>
+
+![mvc-schema](assets/dash.png)
+
+</details>
+
+<details>
+    <summary>FastAPI API UI:</summary>
+
+![mvc-schema](assets/fastapi.png)
+
+</details>
+
+
 ----
 
 # <a id="limitations"></a>Limitations
