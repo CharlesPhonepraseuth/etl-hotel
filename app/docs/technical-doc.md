@@ -427,14 +427,14 @@ By following the Model-View-Controller pattern, this application effectively sep
 <details>
     <summary>Dash dashboard UI:</summary>
 
-![mvc-schema](assets/dash.png)
+![mvc-schema](assets/dash_screenshot.png)
 
 </details>
 
 <details>
     <summary>FastAPI API UI:</summary>
 
-![mvc-schema](assets/fastapi.png)
+![mvc-schema](assets/fastapi_screenshot.png)
 
 </details>
 
