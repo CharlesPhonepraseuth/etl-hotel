@@ -41,24 +41,24 @@ The following code snippet illustrate data extraction in 2 different sources:
 
 ```py
 @task
-    def extract_hotel():
-        folder_path = DATA_FOLDER + "external/accommodations/"
-        extract_files.get_hotel_csv(folder_path)
+def extract_hotel():
+    folder_path = DATA_FOLDER + "external/accommodations/"
+    extract_files.get_hotel_csv(folder_path)
 
-        is_valid = data_validation.validate(folder_path, "accommodations")
+    is_valid = data_validation.validate(folder_path, "accommodations")
 
-        if not is_valid:
-            raise ValueError("Extract hotel not valid")
+    if not is_valid:
+        raise ValueError("Extract hotel not valid")
 
 @task
-    def extract_adress():
-        folder_path = DATA_FOLDER + "external/adress/"
-        extract_files.get_adress_csv(folder_path)
+def extract_adress():
+    folder_path = DATA_FOLDER + "external/adress/"
+    extract_files.get_adress_csv(folder_path)
 
-        is_valid = data_validation.validate(folder_path + "csv/", "adress")
+    is_valid = data_validation.validate(folder_path + "csv/", "adress")
 
-        if not is_valid:
-            raise ValueError("Extract adress not valid")
+    if not is_valid:
+        raise ValueError("Extract adress not valid")
 ```
 
 As shown above, firstly we download CSV files, then we do some validations.  
@@ -66,15 +66,15 @@ Only if these validations were successful, we start transformation parts with th
 
 ```py
 @task
-    def transform():
-        folder_path = DATA_FOLDER
-        transform_files.merge_csv(folder_path)
-        
-        folder_path = DATA_FOLDER + "processed/"
-        is_valid = data_validation.validate(folder_path, "transform")
+def transform():
+    folder_path = DATA_FOLDER
+    transform_files.merge_csv(folder_path)
+    
+    folder_path = DATA_FOLDER + "processed/"
+    is_valid = data_validation.validate(folder_path, "transform")
 
-        if not is_valid:
-            raise ValueError("Transform not valid")
+    if not is_valid:
+        raise ValueError("Transform not valid")
 ```
 
 We merge data and create new file by applying some transformations on our CSV files from 2 different sources. Once again, at the end of this process, we do some validations to check if the data is relatable and ready to be load into our database.
@@ -83,9 +83,9 @@ Finally, we load our clean and processed data by the following code snippet:
 
 ```py
 @task
-    def load():
-        folder_path = DATA_FOLDER + "processed/"
-        load_files.load(folder_path)
+def load():
+    folder_path = DATA_FOLDER + "processed/"
+    load_files.load(folder_path)
 ```
 
 # <a id="data-sources-and-destination"></a>Data Sources and Destinations
