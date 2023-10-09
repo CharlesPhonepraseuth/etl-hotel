@@ -75,6 +75,8 @@ Copy and paste `.env-example` file and rename it `.env` into root directory with
 📂 root
 └── 📁 app                          # Project code
 │   └── 📁 config                   # Configuration files
+│   └── 📁 api                      # Custom API scripts
+│   │   └── 📁 controllers          # API controller scripts
 │   └── 📁 dashboard                # Dash application scripts for visualization and analysis
 │   │   └── 📁 assets               # Static files like images, stylesheets, and JavaScript files
 │   │   └── 📁 callbacks            # Dash callback scripts
@@ -98,6 +100,7 @@ Copy and paste `.env-example` file and rename it `.env` into root directory with
 │   │   └── 📁 plugins
 │   └── 📁 src                      # Source code for the project
 │   │   └── 📁 data                 # Data processing and transformation scripts
+│   │   └── 📁 sql_scripts          # SQL scripts
 │   │   └── 📁 utils                # Utility scripts and helper functions
 │   │   └── 📁 validation           # Data validation and quality assurance scripts
 │   │       └── 📁 validator
@@ -106,6 +109,7 @@ Copy and paste `.env-example` file and rename it `.env` into root directory with
 │       └── 📁 unit
 └── 📁 docker                       # Define Docker container files
 │   └── 📁 airflow
+│   └── 📁 api
 │   └── 📁 dashboard
 │   └── 📁 postgres
 │   └── 📁 tests

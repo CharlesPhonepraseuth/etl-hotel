@@ -18,6 +18,18 @@ app = FastAPI(
             'name': 'hotel',
             'description': 'functions relative to hotels'
         },
+        {
+            'name': 'city',
+            'description': 'functions relative to cities'
+        },
+        {
+            'name': 'rating',
+            'description': 'functions relative to ratings'
+        },
+        {
+            'name': 'region',
+            'description': 'functions relative to regions'
+        }
     ]
 )
 
@@ -56,7 +68,7 @@ def read_rating_distribution():
 
 
 ###
-### RATIN API ROUTE
+### RATING API ROUTE
 ###
 @app.get("/api/rating/average", tags = ["rating"])
 def read_rating_avg():

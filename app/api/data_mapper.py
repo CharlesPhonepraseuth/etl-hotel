@@ -1,5 +1,5 @@
-# Third party imports
-import pandas as pd
+# Standard library imports
+from typing import Dict, Any
 
 # Local application imports
 from src.utils import helper
@@ -13,34 +13,42 @@ class DataMapper:
     def __init__(self):
         self.conn = DatabaseConnection(**helper.get_db_creds())
 
-    def get_hotel_count(self) -> pd.DataFrame:
-        result = self.conn.execute_sql_file(BASEPATH + "get_hotel_count.sql")
+    def get_hotel_count(self) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_hotel_count.sql"
+        result = self.conn.execute_sql_file(file_path)
         return result
     
-    def get_rating_average(self) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_rating_avg.sql")
-        return df
+    def get_rating_average(self) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_rating_avg.sql"
+        result = self.conn.execute_sql_file(file_path)
+        return result
 
-    def get_rating_median(self) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_rating_median.sql")
-        return df
+    def get_rating_median(self) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_rating_median.sql"
+        result = self.conn.execute_sql_file(file_path)
+        return result
     
-    def get_rating_distribution(self) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_rating_distribution.sql")
-        return df
+    def get_rating_distribution(self) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_rating_distribution.sql"
+        result = self.conn.execute_sql_file(file_path)
+        return result
 
-    def get_all_cities(self) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_all_cities.sql")
-        return df
+    def get_all_cities(self) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_all_cities.sql"
+        result = self.conn.execute_sql_file(file_path)
+        return result
 
-    def get_hotel_rank_by_city(self, param={}) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_hotel_rank_by_city.sql", param)
-        return df
+    def get_hotel_rank_by_city(self, param={}) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_hotel_rank_by_city.sql"
+        result = self.conn.execute_sql_file(file_path, param)
+        return result
     
-    def get_hotel_rank_by_capacity(self, param={}) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_region_rank_by_capacity.sql", param)
-        return df
+    def get_hotel_rank_by_capacity(self, param={}) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_region_rank_by_capacity.sql"
+        result = self.conn.execute_sql_file(file_path, param)
+        return result
     
-    def get_hotel_count_and_rank_per_region_above_avg_rating(self, param={}) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_hotel_count_and_rank_per_region_above_avg_rating.sql", param)
-        return df
+    def get_hotel_count_and_rank_per_region_above_avg_rating(self, param={}) -> Dict[str, Any]:
+        file_path = BASEPATH + "get_hotel_count_and_rank_per_region_above_avg_rating.sql"
+        result = self.conn.execute_sql_file(file_path, param)
+        return result

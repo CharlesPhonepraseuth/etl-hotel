@@ -20,6 +20,9 @@ This document covers ETL pipeline project in details.
 - [Data Loading](#data-loading)
 - [Database Schema](#database-schema)
 - [Data Visualization](#data-visualization)
+  - [Components](#components)
+  - [Data Flow](#data-flow)
+  - [Conclusion](#conclusion)
 - [Limitations](#limitations)
 
 ![workflow](./assets/workflow.gif)
@@ -232,26 +235,99 @@ This database schema is designed to facilitate analytical processes, providing a
 
 # <a id="data-visualization"></a>Data Visualization
 
-To do data visualization, we use Dash Plotly. And to handle it properly, we use ***Model-View-Controller*** (***MVC***) pattern, who allow us to have a concise ***separation of concerns*** and have a ***scalable*** and ***maintainable*** code.
+To do data visualization, we use ***Model-View-Controller*** (***MVC***) pattern, who allow us to have a concise ***separation of concerns*** and have a ***scalable*** and ***maintainable*** code.
 
-![mvc-schema](assets/mvc_schema.png)
+![mvc-schema](assets/mvc_schema_1.png)
 
-If you want to going through the code, the entrypoint is `/app/dashboard/index.py`.  
+## Components
 
-Firstly, we register router and callback files.
+![mvc-schema](assets/mvc_schema_2.png)
+
+- **Model** (*FastAPI*)
+
+The Model in this application is responsible for managing data retrieval and processing. FastAPI is used to create API routes that interface with the data source.
+
+<details>
+    <summary>Example Model Code:</summary>
+
+Firstly, create a router who return json data when reaching a specific API endpoint.
 
 ```py
-# index.py
-### Set up router ###
-register_router()
-### Set up callbacks ###
-hotel_callback.register_callbacks(app)
+# app/api/router.py
+@app.get("/api/region/rating/above-average/rank", tags = ['region'])
+def read_hotel_rank_by_capacity(nb):
+    result = hotel_controller.get_hotel_count_and_rank_per_region_above_avg_rating(nb)
+    return result
 ```
 
-Then, we create a router who return the view when reaching a specific endpoint.
+Afterward, we create a controller, who will concentrate all logic and be the concomitant point between Dash Controller (Dash Callback) and FastAPI Model (custom DataMapper).
 
 ```py
-# router.py
+# app/api/controllers/hotel_controller.py
+def get_hotel_count_and_rank_per_region_above_avg_rating(nb: int):
+    param = {"rank": int(nb)}
+    result = DataMapper().get_hotel_count_and_rank_per_region_above_avg_rating(param)
+    return result
+```
+
+Finally, we create a DataMapper to interface with database.
+
+```py
+# app/api/data_mapper.py
+def get_hotel_count_and_rank_per_region_above_avg_rating(self, param={}) -> Dict[str, Any]:
+    file_path = BASEPATH + "get_hotel_count_and_rank_per_region_above_avg_rating.sql"
+    result = self.conn.execute_sql_file(file_path, param)
+    return result
+```
+
+To increase maintainability and lisibility, we separate the SQL query to our DataMapper method.
+
+```sql
+-- app/src/sql_scripts/get_hotel_count_and_rank_per_region_above_avg_rating.sql
+WITH region AS (
+    SELECT
+        id,
+        LEFT(zip, 2) AS num
+    FROM dim_adress
+),
+avg_star AS (
+    SELECT
+        ROUND(AVG(star), 2) AS value
+    FROM fact_hotel
+),
+hotel_data AS (
+    SELECT
+        region.num AS region_num,
+        COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) as hotel_count,
+        DENSE_RANK() OVER (ORDER BY COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) DESC) AS region_rank
+    FROM fact_hotel AS fh
+    JOIN region ON fh.adress_id = region.id,
+        avg_star
+    GROUP BY region.num
+)
+SELECT
+    region_num,
+    hotel_count,
+    region_rank
+FROM hotel_data
+WHERE region_rank <= :rank;
+```
+
+</details>
+
+</br>
+
+- **View** (*Dash Plotly*)
+
+The View handles the presentation and visualization of data. Dash Plotly is employed for creating interactive web-based visualizations.
+
+<details>
+    <summary>Example View Code:</summary>
+
+We create a router who return the view when reaching a specific endpoint.
+
+```py
+# app/dashboard/router.py
 @app.callback(
     Output('page-content', 'children'),
     [Input('url', 'pathname')]
@@ -262,7 +338,7 @@ def display_page(pathname):
         return hotel_analysis.serve_layout()
 ```
 
-After that, we create a layout (***View***) with user interaction, a dropdown in our case.
+Then, we create a layout with user interaction, a dropdown in our case.
 
 ```py
 # hotel_analysis.py
@@ -296,11 +372,22 @@ def serve_layout():
     return layout
 ```
 
-Afterward, we create a Dash callback (***Controller***), who will concentrate all logic and be the concomitant point between the ***View*** and the ***Model***.  
-In this case, we want to fetch data depend on the dropdown value got by user interaction, and render the result by updating our ***View***.
+</details>
+
+</br>
+
+- **Controller** (*Dash Callbacks*)
+  
+The Controller manages the interaction between the Model and the View. Dash Callbacks are used to define the behavior of interactive elements based on user input.
+
+<details>
+    <summary>Example Controller Code:</summary>
+
+We create a Dash callback, who will concentrate all logic and be the concomitant point between the View and the Model.  
+In this case, we want to fetch data depend on the dropdown value got by user interaction, and render the result by updating our View.
 
 ```py
-# hotel_callback.py
+# app/dashboard/hotel_callback.py
 def register_callbacks(app):
 
     @app.callback(
@@ -308,65 +395,39 @@ def register_callbacks(app):
         Output('top-avg-output-div', 'data'),
         [Input(component_id = 'top-avg-dropdown', component_property = 'value')]
     )
+    @app.callback(
+        Output('top-avg-output-div', 'columns'),
+        Output('top-avg-output-div', 'data'),
+        [Input(component_id = 'top-avg-dropdown', component_property = 'value')]
+    )
     def update_rank_hotel_count_by_avg_output(rank):
 
-        param = {"rank": rank}
+        if rank is not None:
 
-        mapper = DataMapper()
-        df = mapper.get_hotel_count_and_rank_per_region_above_avg_rating(param)
+            url = BASE_API_URL + "region/rating/above-average/rank?nb=" + str(rank)
+            response = requests.get(url)
+            df = pd.DataFrame(response.json())
 
-        columns = [{'name': col, 'id': col} for col in df.columns]
-        data = df.to_dict('records')
+            columns = [{'name': col, 'id': col} for col in df.columns]
+            data = df.to_dict('records')
 
-        return columns, data
+            return columns, data
+        
+        return [], []
 ```
 
-Next, we create a DataMapper method (***Model***) who will interact with the database and return data to our ***Controller*** in our case.
+</details>
 
-```py
-# data_mapper.py
-class DataMapper:
-    ...
+## Data Flow
 
-    def get_hotel_count_and_rank_per_region_above_avg_rating(self, param={}) -> pd.DataFrame:
-        df = self.conn.execute_sql_file(BASEPATH + "get_hotel_count_and_rank_per_region_above_avg_rating.sql", param)
-        return df
-```
+- User interacts with the View (e.g., selects a dropdown option).
+- The Controller captures the user input and triggers the corresponding callback.
+- The callback communicates with the Model to retrieve or process data as needed.
+- The callback updates the View with the new visualization based on the processed data.
 
-To increase maintainability and lisibility, we separate the SQL query to our DataMapper method.
+## Conclusion
 
-```sql
--- get_hotel_count_and_rank_per_region_above_avg_rating.sql
-WITH region AS (
-    SELECT
-        id,
-        LEFT(zip, 2) AS num
-    FROM dim_adress
-),
-avg_star AS (
-    SELECT
-        ROUND(AVG(star), 2) AS value
-    FROM fact_hotel
-),
-hotel_data AS (
-    SELECT
-        region.num AS region_num,
-        COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) as hotel_count,
-        DENSE_RANK() OVER (ORDER BY COUNT(CASE WHEN fh.star > avg_star.value THEN 1 END) DESC) AS region_rank
-    FROM fact_hotel AS fh
-    JOIN region ON fh.adress_id = region.id,
-        avg_star
-    GROUP BY region.num
-)
-SELECT
-    region_num,
-    hotel_count,
-    region_rank
-FROM hotel_data
-WHERE region_rank <= %(rank)s;
-```
-
-Subsequently, the data fetched from our ***Model*** by our ***Controller*** will update the ***View***.
+By following the Model-View-Controller pattern, this application effectively separates concerns, making it modular and easier to maintain. FastAPI serves as a robust Model for data handling, while Dash Plotly provides an intuitive platform for building interactive visualizations.
 
 ----
 
