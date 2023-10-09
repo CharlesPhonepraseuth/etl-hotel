@@ -395,11 +395,6 @@ def register_callbacks(app):
         Output('top-avg-output-div', 'data'),
         [Input(component_id = 'top-avg-dropdown', component_property = 'value')]
     )
-    @app.callback(
-        Output('top-avg-output-div', 'columns'),
-        Output('top-avg-output-div', 'data'),
-        [Input(component_id = 'top-avg-dropdown', component_property = 'value')]
-    )
     def update_rank_hotel_count_by_avg_output(rank):
 
         if rank is not None:
