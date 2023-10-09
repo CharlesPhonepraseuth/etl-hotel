@@ -341,7 +341,7 @@ def display_page(pathname):
 Then, we create a layout with user interaction, a dropdown in our case.
 
 ```py
-# hotel_analysis.py
+# app/dashboard/views/hotel_analysis.py
 def serve_layout():
 
     layout = html.Div([
@@ -387,7 +387,7 @@ We create a Dash callback, who will concentrate all logic and be the concomitant
 In this case, we want to fetch data depend on the dropdown value got by user interaction, and render the result by updating our View.
 
 ```py
-# app/dashboard/hotel_callback.py
+# app/dashboard/callbacks/hotel_callback.py
 def register_callbacks(app):
 
     @app.callback(
