@@ -50,8 +50,8 @@ Provide clear, step-by-step instructions on how to install your ETL pipeline. In
 First, clone the ETL pipeline repository to your local machine:
 
 ```sh
-git clone https://github.com/CharlesPhonepraseuth/etl-pipeline.git
-cd etl-pipeline
+git clone https://github.com/CharlesPhonepraseuth/etl-hotel.git
+cd etl-hotel
 ```
 
 ## Step 2: Create logs folder
@@ -59,7 +59,7 @@ cd etl-pipeline
 To use Airflow correctly, you have to create logs folder into pipeline.
 
 ```sh
-cd etl-pipeline/app/pipeline
+cd etl-hotel/app/pipeline
 mkdir logs
 ```
 
