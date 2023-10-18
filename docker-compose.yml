@@ -141,7 +141,7 @@ services:
       dockerfile: ./docker/tests/Dockerfile
     volumes:
       - ./app:/app
-    command: pytest --color=yes -v
+    command: ["sh", "-c", "pytest --color=yes -v $$TEST_FOLDER"]
 
   
   ###
