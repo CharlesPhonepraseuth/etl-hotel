@@ -1,0 +1,49 @@
+name: Unit Test Check On Push
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  unit_test_check_on_push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Create .env file
+      run: |
+        echo "LOCALHOST_IP=${{ secrets.LOCALHOST_IP }}" > .env
+        echo "POSTGRES_HTTP_PORT=${{ secrets.POSTGRES_HTTP_PORT }}" >> .env
+        echo "PGADMIN_HTTP_PORT=${{ secrets.PGADMIN_HTTP_PORT }}" >> .env
+        echo "FASTAPI_HTTP_PORT=${{ secrets.FASTAPI_HTTP_PORT }}" >> .env
+        echo "DASH_HTTP_PORT=${{ secrets.DASH_HTTP_PORT }}" >> .env
+        echo "API_REQUEST_URL=${{ secrets.API_REQUEST_URL }}" >> .env
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+        echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+        echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> .env
+        echo "SQLALCHEMY_POSTGRES_DB_URI=${{ secrets.SQLALCHEMY_POSTGRES_DB_URI }}" >> .env
+        echo "PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}" >> .env
+        echo "PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}" >> .env
+        echo "AIRFLOW_UID=${{ secrets.AIRFLOW_UID }}" >> .env
+        echo "AIRFLOW_GID=${{ secrets.AIRFLOW_GID }}" >> .env
+        echo "POSTGRES_USER_AIRFLOW=${{ secrets.POSTGRES_USER_AIRFLOW }}" >> .env
+        echo "POSTGRES_PASSWORD_AIRFLOW=${{ secrets.POSTGRES_PASSWORD_AIRFLOW }}" >> .env
+        echo "POSTGRES_DB_AIRFLOW=${{ secrets.POSTGRES_DB_AIRFLOW }}" >> .env
+        echo "AIRFLOW__CORE__SQL_ALCHEMY_CONN=${{ secrets.AIRFLOW__CORE__SQL_ALCHEMY_CONN }}" >> .env
+        echo "AIRFLOW__CELERY__RESULT_BACKEND=${{ secrets.AIRFLOW__CELERY__RESULT_BACKEND }}" >> .env
+
+    - name: Build Docker Images
+      run: | 
+        echo --- Building images and starting up docker ---
+        docker compose build tests
+        echo --- Tests container builded —--
+
+    - name: Run Docker Container
+      run: |
+        echo --- Running test cases ---
+        docker compose run -e TEST_FOLDER=tests/unit tests
+        echo --- Completed test cases ---
