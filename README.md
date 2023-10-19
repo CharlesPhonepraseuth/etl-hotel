@@ -21,6 +21,8 @@ This document covers everything and provide an overview about this ETL pipeline 
   - [Step 3: Run pipeline](#step-3-run-pipeline)
 - [Workflow](#workflow)
 - [Running tests](#running-tests)
+- [CI/CD Pipeline with Unit Tests](#cicd-pipeline-with-unit-tests)
+- [Git Hooks for Pre-commit Checks](#git-hooks-for-pre-commit-checks)
 - [Stop and Cleanup](#stop-and-cleanup)
 - [Disclaimer](#disclaimer)
 - [Contact Information](#contact-information)
@@ -73,6 +75,8 @@ Copy and paste `.env-example` file and rename it `.env` into root directory with
 
 ```
 📂 root
+└── 📁 .github                      # Github Actions scripts
+│   └── 📁 workflows
 └── 📁 app                          # Project code
 │   └── 📁 config                   # Configuration files
 │   └── 📁 api                      # Custom API scripts
@@ -168,11 +172,163 @@ For more details: [Technical Documentation](./app/docs/technical-doc.md)
 
 # <a id="running-tests"></a>Running tests
 
+Because of the following code:
+
+```yml
+# docker-compose.yml (tests container)
+command: ["sh", "-c", "pytest --color=yes -v $$TEST_FOLDER"]
+```
+
+`$$TEST_FOLDER` allow us to run pytest into specific folder. If not define, it will run into each folder.  
+
 Once `tests` container is build, you can run the following command to run test:
 
 ```sh
-docker compose up tests
+# test every folder
+docker compose run tests
+# test unit folder
+docker compose run -e TEST_FOLDER=tests/unit tests
 ```
+
+----
+
+# <a id="cicd-pipeline-with-unit-tests"></a>CI/CD Pipeline with Unit Tests
+
+Firstly, we have to create Github secrets and declare each environment variables from .env file, otherwise, the process will failed. To set it in your repository's settings, you can navigate to `Settings > Secrets and variables > Actions > Add repository secret`.  
+
+This repository includes an automated CI/CD pipeline that runs unit tests on each push. The pipeline is configured using GitHub Actions and executes the following steps:
+
+<details>
+  <summary><b>Workflow Configuration Code:</b></summary>
+
+It will declare the worklow name and will triggered on every push to any branch.
+
+```yml
+name: Unit Test Check On Push
+
+on:
+  push:
+    branches:
+      - '*'
+```
+
+</details>
+
+<details>
+  <summary><b>Steps Code:</b></summary>
+
+  <details>
+    <summary><b>1 - Checkout Repository</b></summary>
+
+  This step ensures that the latest code from the repository is available for the subsequent tasks.
+
+  ```yml
+  - name: Checkout repository
+    uses: actions/checkout@v2
+  ```
+
+  </details>
+
+  <details>
+    <summary><b>2 - Create .env File</b></summary>
+
+  To make next step works, the process need environment variables for Docker.  
+  To do it securely, the pipeline creates a .env file with the required environment variables, sourced from GitHub secrets.
+
+  ```yml
+  - name: Create .env file
+    run: |
+      # Add environment variables to .env file
+      echo "LOCALHOST_IP=${{ secrets.LOCALHOST_IP }}" > .env
+      # Add other variables similarly...
+  ```
+
+  </details>
+
+  <details>
+    <summary><b>3 - Build Docker Images</b></summary>
+
+  This step builds Docker images, including the test container.
+
+  ```yml
+  - name: Build Docker Images
+    run: |
+      echo --- Building images and starting up docker ---
+      docker compose build tests
+      echo --- Tests container builded —--
+  ```
+
+  </details>
+
+  <details>
+    <summary><b>4 - Run Docker Container</b></summary>
+
+  This step executes the tests inside a Docker container.
+
+  ```yml
+  - name: Run Docker Container
+    run: |
+      echo --- Running test cases ---
+      docker compose run -e TEST_FOLDER=tests/unit tests
+      echo --- Completed test cases ---
+  ```
+
+  </details>
+
+</details>
+
+</br>
+
+If we want to be proactive and run pytest before `push`, we can do it on each `commit` by using Git Hooks as shown on the next part.
+
+----
+
+# <a id="git-hooks-for-pre-commit-checks"></a>Git Hooks for Pre-commit Checks
+
+In addition to the CI/CD pipeline, we can implement Git hooks for pre-commit checks. This hook will ensure that tests pass before allowing a commit.  
+
+The pre-commit checks are defined in `.git/hooks/pre-commit`.  
+
+<details>
+  <summary><b>File content:</b></summary>
+
+```sh
+#!/bin/bash
+
+# Run pytest
+docker-compose build tests
+docker-compose run -e TEST_FOLDER=tests/unit tests
+
+# If tests pass, allow the commit
+if [ $? -eq 0 ]; then
+  exit 0
+else
+  echo "Tests failed. Commit aborted."
+  exit 1
+fi
+```
+
+</details>
+
+</br>
+
+Make sure to make this script executable using `chmod +x .git/hooks/pre-commit`.  
+
+To create the `pre-commit` file, you can run the following code:
+
+<details>
+  <summary><b>Code:</b></summary>
+
+```sh
+cd etl-hotel
+echo '#!/bin/bash\n\ndocker-compose build tests\ndocker-compose run -e TEST_FOLDER=tests/unit tests\n\nif [ $? -eq 0 ]; then\n  exit 0\nelse\n  echo "Tests failed. Commit aborted."\n  exit 1\nfi' > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+```
+
+</details>
+
+</br>
+
+Consequently, this hook will automatically run each time you attempt to make a commit.
 
 ----
 
