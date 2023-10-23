@@ -266,7 +266,8 @@ Afterward, we create a controller, who will concentrate all logic and be the con
 # app/api/controllers/hotel_controller.py
 def get_hotel_count_and_rank_per_region_above_avg_rating(nb: int):
     param = {"rank": int(nb)}
-    result = DataMapper().get_hotel_count_and_rank_per_region_above_avg_rating(param)
+    json_data = DataMapper().get_hotel_count_and_rank_per_region_above_avg_rating(param)
+    result = json_to_api_response(json_data)
     return result
 ```
 
@@ -311,6 +312,52 @@ SELECT
     region_rank
 FROM hotel_data
 WHERE region_rank <= :rank;
+```
+
+</details>
+
+</br>
+
+<details>
+    <summary>Example API Response</summary>
+
+When API return response successfully:
+
+```json
+{
+  "data": [
+    {
+      "region_num": "06",
+      "hotel_count": 211,
+      "region_rank": 1
+    },
+    {
+      "region_num": "74",
+      "hotel_count": 169,
+      "region_rank": 2
+    },
+    {
+      "region_num": "92",
+      "hotel_count": 88,
+      "region_rank": 3
+    }
+  ],
+  "error": null
+}
+```
+
+When FastAPI return an error (ex: endpoint not found):
+
+```json
+{
+  "data": null,
+  "error": {
+    "code": 404,
+    "data": "N/A",
+    "message": "Ressources not found",
+    "details": "The request could not be found."
+  }
+}
 ```
 
 </details>
@@ -400,14 +447,17 @@ def register_callbacks(app):
         if rank is not None:
 
             url = BASE_API_URL + "region/rating/above-average/rank?nb=" + str(rank)
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            columns = [{'name': col, 'id': col} for col in df.columns]
-            data = df.to_dict('records')
+            error = response["error"]
 
-            return columns, data
-        
+            if not error:
+                df = pd.DataFrame(response["data"])
+                columns = [{'name': col, 'id': col} for col in df.columns]
+                data = df.to_dict('records')
+
+                return columns, data
+
         return [], []
 ```
 
