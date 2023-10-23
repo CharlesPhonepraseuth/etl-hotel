@@ -26,10 +26,16 @@ def register_callbacks(app):
         if pathname == '/hotel-analysis':
 
             url = BASE_API_URL + "hotel/count"
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            return df["value"]
+            error = response["error"]
+
+            if not error:
+                df = pd.DataFrame(response["data"])
+                return df["value"]
+            else:
+                return error["data"]
+
 
 
     @app.callback(
@@ -41,10 +47,15 @@ def register_callbacks(app):
         if pathname == '/hotel-analysis':
 
             url = BASE_API_URL + "rating/average"
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            return df["value"]
+            error = response["error"]
+
+            if not error:
+                df = pd.DataFrame(response["data"])
+                return df["value"]
+            else:
+                return error["data"]
 
 
     @app.callback(
@@ -56,10 +67,15 @@ def register_callbacks(app):
         if pathname == '/hotel-analysis':
 
             url = BASE_API_URL + "rating/median"
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
-            
-            return df["value"]
+            response = requests.get(url).json()
+
+            error = response["error"]
+
+            if not error:
+                df = pd.DataFrame(response["data"])
+                return df["value"]
+            else:
+                return error["data"]
         
 
     @app.callback(
@@ -71,14 +87,21 @@ def register_callbacks(app):
         if pathname == '/hotel-analysis':
 
             url = BASE_API_URL + "rating/distribution"
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            fig = px.bar(df, x='star', y='frequency', text='frequency', 
+            error = response["error"]
+
+            if not error:
+                df = pd.DataFrame(response["data"])
+                
+                fig = px.bar(df, x='star', y='frequency', text='frequency', 
                  title='Star Rating Distribution',
                  labels={'star': 'Star Rating', 'frequency': 'Frequency'})
             
-            return fig
+                return fig
+        
+            else:
+                return error["data"]
         
 
     @app.callback(
@@ -90,10 +113,15 @@ def register_callbacks(app):
         if pathname == '/hotel-analysis':
 
             url = BASE_API_URL + "city"
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            city_dropdown_options = [{'label': city.capitalize(), 'value': city} for city in df["city"]]
+            error = response["error"]
+
+            if not error:
+                df = pd.DataFrame(response["data"])
+                city_dropdown_options = [{'label': city.capitalize(), 'value': city} for city in df["city"]]
+            else:
+                city_dropdown_options = []
 
             return city_dropdown_options
 
@@ -112,14 +140,17 @@ def register_callbacks(app):
         if city is not None:
 
             url = BASE_API_URL + "hotel/city/" + city
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            columns = [{'name': col, 'id': col} for col in df.columns]
-            data = df.to_dict('records')
+            error = response["error"]
 
-            return columns, data
-        
+            if not error:
+                df = pd.DataFrame(response["data"])
+                columns = [{'name': col, 'id': col} for col in df.columns]
+                data = df.to_dict('records')
+
+                return columns, data
+
         return [], []
     
 
@@ -133,14 +164,17 @@ def register_callbacks(app):
         if rank is not None:
 
             url = BASE_API_URL + "region/rank?nb=" + str(rank)
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            columns = [{'name': col, 'id': col} for col in df.columns]
-            data = df.to_dict('records')
+            error = response["error"]
 
-            return columns, data
-        
+            if not error:
+                df = pd.DataFrame(response["data"])
+                columns = [{'name': col, 'id': col} for col in df.columns]
+                data = df.to_dict('records')
+
+                return columns, data
+
         return [], []
     
 
@@ -154,13 +188,16 @@ def register_callbacks(app):
         if rank is not None:
 
             url = BASE_API_URL + "region/rating/above-average/rank?nb=" + str(rank)
-            response = requests.get(url)
-            df = pd.DataFrame(response.json())
+            response = requests.get(url).json()
 
-            columns = [{'name': col, 'id': col} for col in df.columns]
-            data = df.to_dict('records')
+            error = response["error"]
 
-            return columns, data
-        
+            if not error:
+                df = pd.DataFrame(response["data"])
+                columns = [{'name': col, 'id': col} for col in df.columns]
+                data = df.to_dict('records')
+
+                return columns, data
+
         return [], []
     

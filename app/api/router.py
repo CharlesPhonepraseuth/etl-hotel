@@ -100,6 +100,12 @@ def read_hotel_rank_by_capacity(nb):
     return result
 
 
+# Handle undefined endpoints
+@app.get("/{undefined_endpoint:path}")
+def handle_undefined_endpoint(undefined_endpoint: str):
+    result = hotel_controller.handle_undefined_endpoint(undefined_endpoint)
+    return result
+
 
 
 
